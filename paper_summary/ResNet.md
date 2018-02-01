@@ -2,6 +2,7 @@
 
 ## Comment
 * This paper focuses on *degradation*, which is often occurred using deeper network.
+
 ## Abstract
 * 152 layers - 8x deeper than the state-of-art, still having lower complexity
 * learning residual functions with ference to the layer inputs
@@ -22,6 +23,7 @@
 ## 3. Deep Residual Learning
 ### 3.1 Residual Learning
 * The reformulation of mapping helps to reasonably **precondition**  the problem
+
 ### 3.2 Identity Mapping by Shortcuts
 The building block is defined as,
 $$ y = \mathcal{F}(\mathbf{x}, \{W_i\}) + W_s\mathbf{x}$$
@@ -37,8 +39,9 @@ where $W_s$  is used to match the dimension.
 | # of Layer | 19 | 34 | 34 |
 
 In case that the dimensions increase,
+
 * (A) Identity Mapping with extra zero entries padded for increasing dimensions
- * (B) Projection shortcut
+* (B) Projection shortcut
 
 with a stride of 2.
 
