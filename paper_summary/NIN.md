@@ -37,7 +37,7 @@ $$
 f_{i,j,k}^n = \max_m({w_{k_m}}^Tx_{i,j})
 $$
 
-* mlpconv layer differes from maxout layer in that the convex function approximator is replaced by a universal function approximator.
+* mlpconv layer differs from maxout layer in that the convex function approximator is replaced by a universal function approximator.
 
 ## 3.2 Global Average Pooling
 * Replaces FC layers in CNN
