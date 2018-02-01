@@ -31,16 +31,17 @@ $$
 $$
 f_{i,j,k_n}^n = \max({w_{k_n}^n}^Tf_{i,j}^{n-1} + b_{k_n}, 0).
 $$
+
 * In case of maxout,
 $$
 f_{i,j,k}^n = \max_m({w_{k_m}}^Tx_{i,j})
 $$
 
-* Mlpconv layer differes from maxout layer in that the convex function approximator is replaced by a universal function approximator.
+* mlpconv layer differes from maxout layer in that the convex function approximator is replaced by a universal function approximator.
 
 ## 3.2 Global Average Pooling
 * Replaces FC layers in CNN
-* No parameters to potimize thus overfitting is avoided at that layer.\
+* No parameters to optimize thus overfitting is avoided at that layer.\
 * More robust to spatial translations
 
 ## 3.3 Network In Network Structure
