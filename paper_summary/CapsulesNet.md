@@ -48,7 +48,7 @@ $$
 	* for all capsule $i$ in layer $l$: $c_i$ ← $softmax(b_i)$
 for all capsule $j$ in layer $(l + 1)$: sj ←$\sum_ic_{ij}\hat{\mathbf{u}}_{j|i}$
 for all capsule $j$ in layer $(l + 1)$: vj ← $squash(s_j)$
-for all capsule $i$ in layer $l$ and capsule $j$ in layer $(l + 1)$: $b_{ij} ← b_{ij} + \hat{\mathbf{u}}_{j|i} \cdot{v_j}$
+for all capsule $i$ in layer $l$ and capsule $j$ in layer $(l + 1)$: $b_{ij}\leftarrow b_{ij}+\hat{\mathbf{u}}_{j|i}\cdot{v_j}$
 
 * return $v_j$
 
