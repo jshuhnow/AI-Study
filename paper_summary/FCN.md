@@ -50,6 +50,7 @@ $$
 f_{ij}' = \begin{cases} f_{i/s, j/s} & \text{if $s$ divides both $i$ and $j$}\\
 0 & \text{otherwise} \end{cases}
 $$
+
 #### Tradeoff
 * Decreasing subsampling -- the filters see finer infomration but have smaller receptive fields and take longer to compute
 * Shift-and-stitch -- the output is denser without decreasing the receptive field sizes of the filters, but the filters are prohibited from accessing information at a finer scale
