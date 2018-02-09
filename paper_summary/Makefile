@@ -1,3 +1,4 @@
+PDF_DIR=pdf/
 .PHONY: directories
 
 all: directories target
@@ -5,12 +6,12 @@ directories:
 	-mkdir pdf
 
 FILES := $(filter-out README, $(basename $(wildcard *.md)))
-PDF := $(addsuffix .pdf, $(FILES))
+PDF := $(addprefix $(PDF_DIR), $(addsuffix .pdf, $(FILES)))
 
 target: $(PDF)
 
-%.pdf: %.md
-	pandoc -o "pdf/$@" "$<" --latex-engine=xelatex --wrap=preserve
+$(PDF_DIR)%.pdf: %.md
+	pandoc -o "$@" "$<" --latex-engine=xelatex --wrap=preserve
 
 .PHONY: clean
 
