@@ -67,3 +67,15 @@ $$
 2. multi-scale approach - provides approximately through an image pyramid. randomly sampled a pyramid scale
 
 ## 3. Fast R-CNN detection
+* Assumes $\mathrm{Pr}(\mathrm{class}=k\ |\ r)\triangleq p_k$
+
+### 3.1. Truncated SVD for faster Detection
+* For classification, less time spent on FC layers compared to the conv layers
+* For detection, # of RoIs is large and nearly half of the forward pass time is spent on FC
+It can be accelerated using truncated SVD.
+$$
+W \approx U\Sigma_t V^t
+$$
+It reduces # of parameters from $uv$ to $t(u+v)$, which is extremely efficient as $t \ll min(u,v)$
+
+A single layer is splited. The first layer computes $\Sigma_t V^t$ and the second layer computes $U$.
