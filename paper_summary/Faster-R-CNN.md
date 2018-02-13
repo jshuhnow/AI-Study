@@ -5,7 +5,7 @@ It achieves *translation-invariance*. It can perform real-time detection.
 It is not clearly a priori in terms of the convergence of shared (of RPN and Fast R-CNN) network
 
 ## Abstract
-*Reason Proposal Network (RPN)* shares full-image convolutional features with the detection network, enabling nearly cost-free region proposals. FC network simultaneously predicts object bounds and objectness scores at each position. It can detect in 5-17 fps and gains 70.4% mAP using 300 proposals per immage.
+*Region Proposal Network (RPN)* shares full-image convolutional features with the detection network, enabling nearly cost-free region proposals. FC network simultaneously predicts object bounds and objectness scores at each position. It can detect in 5-17 fps and gains 70.4% mAP using 300 proposals per immage.
 
 ## 1. Introduction
 * Region proposals are the computational bottleneck. In Faster R-CNN, the proposal computation is nearly cost-free given network's computation.
