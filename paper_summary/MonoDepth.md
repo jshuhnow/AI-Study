@@ -1,0 +1,94 @@
+# [Unspervised Monocular Depth Estimation with Left-Right Consistency](https://arxiv.org/pdf/1609.03677.pdf)
+
+## Abstract
+Despite the absense of ground truth depth data, it performs single image depth estimation, genearing disparity images by training the network with an image reconstruction loss. To overcome the poor result of the reconstruction loss, the author proposes a novel training loss that enforces consistency between the disparities.
+
+## 1. Introduction
+* Most existing techniques relyes on the assumption that multiple observations of the scene of interest are available.
+* The FC model does not require any depth data.
+* It trains the depth as an intermediate.
+* It learns to predict the pixel-level correspondence between pairs of rectified stereo images.
+* 35 msec to predict a dense depth map
+* The contribution would be
+	1) A network architecture that performs end-to-end unsupervised monocular depth estimation 	preserving left-right depth consistency
+	2) An evaluation of several training losses and models
+	3) new dataset
+
+## 2. Related Work
+Many approaches are typically only applicable with more than one input image for the scene of interest.
+
+### Learning-Based Stereo
+Models like DispNet requires expensive ground truth data at training time. Also, those approaches use synthetic data for training.
+
+### Supervised Single Image Depth Estimation
+Still needs high quality, pixel aligned, ground truth depth at training time. Monodepth network perform single depth image estimation with an added binocular color image instead of massive ground truth depth.
+
+### Unsupervised Depth Estimation
+* It does not require ground truth depth at training time.
+* Some of them (i.e. DeepStereo) are not suitable because it requires several nearby posed images at test time.
+* The Deep3D network requires heavy memory usage, which means not scalable with bigger resolutions.
+* Some models are not fully differentiable.
+* The monodepth model are fully differentiable with in-model left-right consistency check. 
+
+## 3. Method
+
+### 3.1 Depth Estimation as Image Reconstruction
+Given Image $I$ at test time, predicting the per-pixel scene depth,
+$$
+\hat{d} = f(I)
+$$
+
+* Given a calibrated pair of binocular cameras, we can learn function in order to reconstruct on image from other and 3D shape of the scene being imaged.
+
+At training time, $\tilde {I^r} = I^l(d^r), \tilde {I^l} = I^r(d^l)$, where $d$ corresponds to the image disparity - a scalar value per pixel that the model will learn to predict.
+
+After that, given the base line distance $b$ between the cameras and the focal length $f$, trivailly recover the depth, $$\hat{d} = bf/d$$
+
+
+### 3.2 Depth Estimation Network
+At a high level, our network estimates depth by inferring the disparities that warp the left image to match the right one. We can simultaneously infer both disparities, using only the left input image, and obtain better depths by enforcing them to be consistent with each other.
+
+![enter image description here](data:image/png;base64,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)
+
+![enter image description here](https://ai2-s2-public.s3.amazonaws.com/figures/2017-08-08/2bf7ea5934523a89a905c2fc480e15d8bf394910/3-Figure2-1.png)
+
+### 3.3 Training Loss
+For each scale $s$, the total loss $C=\sum_{s=1}^4C_s$
+
+$$
+C_s = \alpha_{ap}(C_{ap}^l + C_{ap}^r ) + \alpha_{ds}(C_{ds}^l  + C_{ds}^r) + \alpha_{lr}(C_{lr}^l + C_{lr}^r)
+$$
+
+#### Appearance Matching Loss
+$$
+C_{ap}^l = \frac{1}{N}\sum_{i,j} \alpha \frac
+{1 -
+	\mathrm{
+		SSIM( I_{ij}^l, \tilde{ I_{ij}^l } )
+	}
+}
+{2} + (1-\alpha) \left| \left| I_{ij}^l - \tilde{I_{ij}^l}  \right| \right|
+$$
+
+#### Disparity Smoothness Loss
+$$
+C_{ds}^l = \frac{1}{N}
+\sum
+_{i,j}
+\left| \partial_x d_{ij}^l\right|e^{-\left|\left|{\partial_x I_{ij}^l}\right|\right|}
++
+\left| \partial_y d_{ij}^l\right|e^{-\left|\left|{\partial_y I_{ij}^l}\right|\right|}
+$$
+
+#### Left-Right Disparity Consistency Loss
+$$
+C_{lr}^l = \frac{1}{N} \sum_{i,j} \left|d_{ij}^l - d_{ij+d_{ij}^l}^r \right|
+$$
+
+## 4. Results
+It does better at resolving small objects such as the pedestrains and poles.
+
+### 4.6 Limitations
+* There are still some artifacts visible at occlusion boundaries due to the pixels in the occlusion region not being visible in both images.
+* It requires rectified and temporally aligned stereo paris during trainig, meaning we cannot use existing single-view datasets for training purposes
+* It relies on the image reconstruction term, namly that specular and transparent surfaces will produce inconsistent depths. -- This could be improved with more sophisticated similarity measures.
