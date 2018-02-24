@@ -1,4 +1,4 @@
-# [ImageNet Classificdation with Deep CNN](https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf)
+# [ImageNet Classification with Deep CNN](https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf)
 
 Author : Jaeseok Huh @ Hanyang University  
 Date : Jan 29, 2018
