@@ -189,7 +189,21 @@ class FullyConnectedNet(object):
         # beta2, etc. Scale parameters should be initialized to one and shift      #
         # parameters should be initialized to zero.                                #
         ############################################################################
-        pass
+        
+        for i in range(self.num_layers):
+            idx_str = str(i+1)
+            
+            prv_dim = hidden_dims[i-1] if i!=0 else input_dim
+            nxt_dim = hidden_dims[i] if i!=self.num_layers-1 else num_classes
+            
+            self.params['W'+idx_str] = weight_scale * np.random.randn(prv_dim, nxt_dim)
+            self.params['b'+idx_str] = np.zeros(nxt_dim)
+            
+            if self.use_batchnorm:
+                self.params['gamma'+idx_str] = weight_scale * np.random.randn(prv_dim, nxt_dim)
+                self.params['betta'+idx_str] = weight_scale * np.zeros(nxt_dim)
+        
+        
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -246,8 +260,29 @@ class FullyConnectedNet(object):
         # the forward pass for the first batch normalization layer, pass           #
         # self.bn_params[1] to the forward pass for the second batch normalization #
         # layer, etc.                                                              #
+        
+        a = [None for i in range(self.num_layers+1)]
+        cache = [None for i in range(self.num_layers+1)]
+        a[0] = X
+        
+        # TODO : batch normalization, dropout
+        if self.use_batchnorm or self.use_dropout:
+            assert(0)
+        
+        reg_loss = 0.0
         ############################################################################
-        pass
+        for i in range(self.num_layers):
+            idx_str = str(i+1)
+            W, b= self.params['W' + idx_str], self.params['b' + idx_str]
+            
+            if i==self.num_layers-1:
+                a[i+1], cache[i+1] = affine_forward(a[i], W,  b)
+                               
+            else:
+                a[i+1], cache[i+1] = affine_relu_forward(a[i], W, b)
+            reg_loss += .5 * self.reg *np.sum(W*W)
+            
+        data_loss, scores = softmax_loss(a[-1], y)
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -256,7 +291,8 @@ class FullyConnectedNet(object):
         if mode == 'test':
             return scores
 
-        loss, grads = 0.0, {}
+        loss, grads = data_loss + reg_loss, {}
+        
         ############################################################################
         # TODO: Implement the backward pass for the fully-connected net. Store the #
         # loss in the loss variable and gradients in the grads dictionary. Compute #
@@ -270,9 +306,20 @@ class FullyConnectedNet(object):
         # automated tests, make sure that your L2 regularization includes a factor #
         # of 0.5 to simplify the expression for the gradient.                      #
         ############################################################################
-        pass
+        
+        dscores = scores
+        for i in range(self.num_layers-1, -1, -1):
+            W_str = 'W' + str(i+1)
+            b_str = 'b' + str(i+1)
+            if i==self.num_layers-1:
+                dscores, grads[W_str], grads[b_str] = affine_backward(dscores, cache[i+1])    
+            else:
+                dscores, grads[W_str], grads[b_str] = affine_relu_backward(dscores, cache[i+1])
+                
+            grads[W_str] += self.reg * self.params[W_str]
+            
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
-
+        
         return loss, grads
