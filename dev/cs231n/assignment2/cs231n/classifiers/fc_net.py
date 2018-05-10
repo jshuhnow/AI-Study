@@ -150,24 +150,6 @@ def affine_batchnorm_relu_forward(a, W, b, gamma, beta, bn_param):
     cache = (fc_cache, bn_cache, relu_cache)
     return out, cache
 
-def affine_batchnorm_forward(a, W, b, gamma, beta, bn_param):
-    """
-    Inputs :
-    - a : Input to the affine layer
-    - W, b : Weights for the affine layer
-    - gamma, beta : Weights for the batch normalization layer
-    - bn_param : Parameters for the batch normalization layer
-    
-    Outputs :
-    - out : Output from the ReLU Layer
-    - cache : Cache for the backward
-    """
-    N = a.shape[0]
-    af, fc_cache = affine_forward(a.reshape([N, -1]), W, b)
-    bn, bn_cache = batchnorm_forward(af, gamma, beta, bn_param)
-    cache = (fc_cache, bn_cache)
-    return out, cache
-
 def affine_batchnorm_relu_backward(dout, cache):
     """
     Inputs :
@@ -188,6 +170,24 @@ def affine_batchnorm_relu_backward(dout, cache):
     dx, dW, db = affine_backward(dbn, fc_cache)
     return dx, dW, db, dgamma, dbeta
 
+def affine_batchnorm_forward(a, W, b, gamma, beta, bn_param):
+    """
+    Inputs :
+    - a : Input to the affine layer
+    - W, b : Weights for the affine layer
+    - gamma, beta : Weights for the batch normalization layer
+    - bn_param : Parameters for the batch normalization layer
+    
+    Outputs :
+    - out : Output from the ReLU Layer
+    - cache : Cache for the backward
+    """
+    N = a.shape[0]
+    af, fc_cache = affine_forward(a.reshape([N, -1]), W, b)
+    bn, bn_cache = batchnorm_forward(af, gamma, beta, bn_param)
+    cache = (fc_cache, bn_cache)
+    return out, cache
+
 def affine_batchnorm_backward(dout, cache):
     """
     Inputs :
@@ -207,9 +207,96 @@ def affine_batchnorm_backward(dout, cache):
     dx, dW, db = affine_backward(dbn, fc_cache)
     return dx, dW, db, dgamma, dbeta
 
+def affine_relu_dropout_forward(a, W, b, dropout_param):
+    """
+    Inputs :
+    - a : Input to the affine layer
+    - W, b : Weights for the affine layer
+    - gamma, beta : Weights for the batch normalization layer
+    - bn_param : Parameters for the batch normalization layer
+    - dropout_param : Parameters for the dropout layer
+    
+    Outputs :
+    - out : Output from the final Layer
+    - cache : Cache for the backward (fc, relu, do)
+    """
+    
+    N = a.shape[0]
+    af, fc_cache = affine_forward(a.reshape([N, -1]), W, b)
+    rl, relu_cache= relu_forward(af)
+    out, do_cache = dropout_forward(rl, dropout_param)
+    cache = (fc_cache, relu_cache, do_cache)
+    return out, cache
+
+def affine_relu_dropout_backward(dout, cache):
+    """
+    Inputs :
+    - dout : Gradient of the output node
+    - cache : Cache from the forward
+    
+    Outputs :
+    - dx
+    - dW
+    - db
+    ** gradients to the corresponding value
+    """
+    
+    fc_cache, relu_cache, do_cache = cache
+    ddo = dropout_backward(dout, do_cache)
+    drl = relu_backward(ddo, relu_cache)
+    dx, dW, db = affine_backward(drl, fc_cache)
+    return dx, dW, db
+    
+    
+    
+def affine_batchnorm_relu_dropout_foward(a, W, b, gamma, beta, bn_param, dropout_param):
+    """
+    Inputs :
+    - a : Input to the affine layer
+    - W, b : Weights for the affine layer
+    - gamma, beta : Weights for the batch normalization layer
+    - bn_param : Parameters for the batch normalization layer
+    - dropout_param : Parameters for the dropout layer
+    
+    Outputs :
+    - out : Output from the final Layer
+    - cache : Cache for the backward (fc, bn, relu, do)
+    """
+    
+    N = a.shape[0]
+    af, fc_cache = affine_forward(a.reshape([N, -1]), W, b)
+    bn, bn_cache = batchnorm_forward(af, gamma, beta, bn_param)
+    rl, relu_cache= relu_forward(bn)
+    out, do_cache = dropout_forward(rl, dropout_param)
+    cache = (fc_cache, bn_cache, relu_cache, do_cache)
+    return out, cache
+
+def affine_batchnorm_relu_dropout_backward(dout, cache):
+    """
+    Inputs :
+    - dout : Gradient of the output node
+    - cache : Cache from the forward
+    
+    Outputs :
+    - dx
+    - dW
+    - db
+    - dgamma
+    - dbeta
+    ** gradients to the corresponding value
+    """
+    
+    fc_cache, bn_cache, relu_cache, do_cache = cache
+    ddo = dropout_backward(dout, do_cache)
+    drl = relu_backward(ddo, relu_cache)
+    dbn, dgamma, dbeta = batchnorm_backward(ddl, bn_cache)
+    dx, dW, db = affine_backward(dbn, fc_cache)
+    return dx, dW, db, dgamma, dbeta
+    
+
 class FullyConnectedNet(object):
     """
-    A fully-connected neural network with an arbitrary number of hidden layers,
+        A fully-connected neural network with an arbitrary number of hidden layers,
     ReLU nonlinearities, and a softmax loss function. This will also implement
     dropout and batch normalization as options. For a network with L layers,
     the architecture will be
@@ -340,10 +427,6 @@ class FullyConnectedNet(object):
         cache = [None for i in range(self.num_layers+1)]
         a[0] = X
         
-        # TODO : batch normalization, dropout
-        if self.use_dropout:
-            assert(0)
-        
         reg_loss = 0.0
         ############################################################################
         for i in range(self.num_layers):
@@ -355,10 +438,17 @@ class FullyConnectedNet(object):
                 a[i+1], cache[i+1] = affine_forward(a[i], W, b)
             else:
                 if not self.use_batchnorm:
-                    a[i+1], cache[i+1] = affine_relu_forward(a[i], W, b)
+                    if not self.use_dropout:
+                        a[i+1], cache[i+1] = affine_relu_forward(a[i], W, b)
+                    else:
+                        a[i+1], cache[i+1] = affine_relu_dropout_forward(a[i], W, b, self.dropout_param)
                 else:
                     gamma, beta = self.params['gamma' + idx_str], self.params['beta' + idx_str]
-                    a[i+1], cache[i+1] = affine_batchnorm_relu_forward(a[i], W, b, gamma, beta, self.bn_params[i])
+
+                    if not self.use_dropout:
+                        a[i+1], cache[i+1] = affine_batchnorm_relu_forward(a[i], W, b, gamma, beta, self.bn_params[i])
+                    else:
+                        a[i+1], cache[i+1] = affine_batchnorm_relu_dropout_forward(a[i], W, b, gamma, beta, self.bn_params[i], self.dropout_param)
                 
             reg_loss += .5 * self.reg *np.sum(W*W)
             
@@ -395,11 +485,17 @@ class FullyConnectedNet(object):
                 dscores, grads[W_str], grads[b_str] = affine_backward(dscores, cache[i+1])    
             else:
                 if not self.use_batchnorm:
-                    dscores, grads[W_str], grads[b_str] = affine_relu_backward(dscores, cache[i+1])
+                    if not self.use_dropout:                        
+                        dscores, grads[W_str], grads[b_str] = affine_relu_backward(dscores, cache[i+1])
+                    else:
+                        dscores, grads[W_str], grads[b_str] = affine_relu_dropout_backward(dscores, cache[i+1])
                 else:
                     gamma_str = 'gamma' + str(i+1)
                     beta_str = 'beta' + str(i+1)
-                    dscores, grads[W_str], grads[b_str], grads[gamma_str], grads[beta_str] = affine_batchnorm_relu_backward(dscores, cache[i+1])
+                    if not self.use_dropout:
+                        dscores, grads[W_str], grads[b_str], grads[gamma_str], grads[beta_str] = affine_batchnorm_relu_backward(dscores, cache[i+1])
+                    else:
+                        dscores, grads[W_str], grads[b_str], grads[gamma_str], grads[beta_str] = affine_batchnorm_relu_dropout_backward(dscores, cache[i+1])
                     
                 
             grads[W_str] += self.reg * self.params[W_str]           
